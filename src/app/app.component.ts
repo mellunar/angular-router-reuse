@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,19 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'angular-test';
+  constructor(private router: Router) {
+    this.appInit();
+  }
+
+  appInit() {
+    this.routerSubscriber();
+  }
+
+  routerSubscriber() {
+    this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        // console.log(event.url);
+      }
+    });
+  }
 }
