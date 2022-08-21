@@ -5,7 +5,7 @@ import {
   RouteReuseStrategy,
 } from '@angular/router';
 
-export class CustomRouteReuseStrategy implements RouteReuseStrategy {
+export class CustomRouteReuseStrategy extends RouteReuseStrategy {
   // references
   // https://stackoverflow.com/a/41515648/16843428
   // https://javascript.plainenglish.io/angular-route-reuse-strategy-b5d40adce841
