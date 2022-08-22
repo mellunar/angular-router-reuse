@@ -19,9 +19,7 @@ const routes: Routes = [
     path: 'test',
     children: [
       { path: '', component: Page3Component, pathMatch: 'full' },
-      { path: 'page4', component: Page4Component },
-      { path: 'page4/:id', component: Page4Component },
-      { path: ':id', component: Page3Component },
+      { path: ':id', component: Page4Component },
     ],
   },
   {

@@ -1,11 +1,15 @@
-import { ComponentRef } from '@angular/core';
+import { ComponentRef, Injectable } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
   DetachedRouteHandle,
   RouteReuseStrategy,
 } from '@angular/router';
+import { SessionService } from './services/session.service';
 
-export class CustomRouteReuseStrategy {
+@Injectable({
+  providedIn: 'root',
+})
+export class CustomRouteReuseStrategy implements RouteReuseStrategy {
   // references
   // https://stackoverflow.com/a/41515648/16843428
   // https://javascript.plainenglish.io/angular-route-reuse-strategy-b5d40adce841
@@ -13,10 +17,15 @@ export class CustomRouteReuseStrategy {
 
   private storedRoutes: { [key: string]: DetachedRouteHandle }[] = [];
 
+  constructor(private sessionService: SessionService) {}
+
   // shouldDetach and store are called when leaving a route
   // if returns true, allows store method to save current component
   shouldDetach(route: ActivatedRouteSnapshot): boolean {
-    return true;
+    if (route.routeConfig?.component) {
+      return true;
+    }
+    return false;
   }
 
   // handles logic for storing
@@ -24,7 +33,8 @@ export class CustomRouteReuseStrategy {
     // path is the route you just left
     // it's safer to store component name due to root routes
     // being considered null as they are === ''
-    const path = route.routeConfig.component.name;
+    const path = this.sessionService.previousRoute;
+
     const hasRoute = this.storedRoutes.some((i) => i[path]);
     if (handle && !hasRoute) {
       this.storedRoutes.push({ [path]: handle });
@@ -41,7 +51,7 @@ export class CustomRouteReuseStrategy {
       return false;
     }
 
-    path = route.routeConfig.component.name;
+    path = this.sessionService.currentRoute;
 
     if (this.storedRoutes.length > 1) {
       isPathStored = Object.keys(this.storedRoutes[0])[0] === path;
@@ -58,12 +68,13 @@ export class CustomRouteReuseStrategy {
     }
 
     const hasRoute = this.storedRoutes.some((i) => i[path]);
+
     return !!route.routeConfig && hasRoute;
   }
 
   // get component from store
   retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null {
-    const path = route.routeConfig.component.name;
+    const path = this.sessionService.currentRoute;
     const index = this.storedRoutes.findIndex((i) => i[path]);
     if (index > -1) {
       return this.storedRoutes[index][path];

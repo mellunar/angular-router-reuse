@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router, RoutesRecognized } from '@angular/router';
+import { filter, pairwise } from 'rxjs';
+import { SessionService } from './services/session.service';
 
 @Component({
   selector: 'app-root',
@@ -7,19 +9,25 @@ import { NavigationEnd, Router } from '@angular/router';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  constructor(private router: Router) {
+  constructor(private router: Router, private sessionService: SessionService) {
     this.appInit();
   }
 
   appInit() {
-    this.routerSubscriber();
+    this.routerRegister();
   }
 
-  routerSubscriber() {
-    this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        // console.log(event.url);
-      }
-    });
+  routerRegister() {
+    this.router.events
+      .pipe(
+        filter((evt: any) => evt instanceof RoutesRecognized),
+        pairwise()
+      )
+      .subscribe((events: RoutesRecognized[]) => {
+        this.sessionService.updateRoutes(
+          events[0].urlAfterRedirects,
+          events[1].urlAfterRedirects
+        );
+      });
   }
 }
